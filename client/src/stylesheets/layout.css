@@ -1,0 +1,674 @@
+/* ========================================================
+   MODERN FULL-HEIGHT SAAS LAYOUT & ADAPTIVE DAY/NIGHT THEME
+   ======================================================== */
+
+.layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Light / Day Theme Layout */
+.layout.theme-light {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Pure Black Night Theme Layout */
+.layout.theme-dark {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------
+   TRUE FULL-HEIGHT ANCHORED SIDEBAR
+   -------------------------------------------------------- */
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  padding: 20px 14px;
+  border-radius: 0; /* Flush to the screen edge */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  overflow-y: auto;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Light / Day Theme Sidebar */
+.sidebar.theme-light {
+  background-color: #ffffff !important;
+  border-right: 1px solid #e2e8f0 !important;
+  box-shadow: 2px 0 10px rgba(15, 23, 42, 0.03);
+}
+
+/* Dark / Night Theme Sidebar (Pitch Black) */
+.sidebar.theme-dark {
+  background-color: #050505 !important;
+  border-right: 1px solid #1f2937 !important;
+  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.7);
+}
+
+.sidebar.collapsed {
+  padding: 20px 10px;
+}
+
+/* Navigation Menu */
+.sidebar .menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 11px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  gap: 12px;
+  font-weight: 500;
+  font-size: 13.5px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Light Theme Menu Item */
+.sidebar.theme-light .menu-item {
+  color: #475569 !important;
+}
+
+.sidebar.theme-light .menu-item:hover {
+  background-color: #f1f5f9;
+  color: #0f172a !important;
+}
+
+/* Dark Theme Menu Item (Crisp High-Contrast Text) */
+.sidebar.theme-dark .menu-item {
+  color: #d4d4d8 !important;
+}
+
+.sidebar.theme-dark .menu-item:hover {
+  background-color: #18181b;
+  color: #ffffff !important;
+}
+
+.sidebar.collapsed .menu-item {
+  justify-content: center;
+  padding: 11px 0;
+  gap: 0;
+}
+
+.menu-item i {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Active Menu Item */
+.active-menu-item {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+  font-weight: 600;
+}
+
+.active-menu-item i {
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------
+   SIDEBAR CONTROLS: THEME TOGGLE & USER FOOTER
+   -------------------------------------------------------- */
+.sidebar-theme-btn {
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.sidebar.theme-light .sidebar-theme-btn {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.sidebar.theme-light .sidebar-theme-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.sidebar.theme-dark .sidebar-theme-btn {
+  background-color: #121215;
+  border: 1px solid #27272a;
+  color: #ffffff;
+}
+
+.sidebar.theme-dark .sidebar-theme-btn:hover {
+  background-color: #18181b;
+  color: #ffffff;
+}
+
+.sidebar-user-footer {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar.theme-light .sidebar-user-footer {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.sidebar.theme-light .sidebar-user-footer:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.sidebar.theme-dark .sidebar-user-footer {
+  background: #121215;
+  border: 1px solid #27272a;
+}
+
+.sidebar.theme-dark .sidebar-user-footer:hover {
+  background-color: #18181b;
+  border-color: #3f3f46;
+}
+
+/* --------------------------------------------------------
+   TAB PILL SELECTORS (Day & Night Mode Adaptive)
+   -------------------------------------------------------- */
+.tab-pill-container {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 12px;
+  gap: 4px;
+  background-color: #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.layout.theme-dark .tab-pill-container {
+  background-color: #0e0e11 !important;
+  border: 1px solid #27272a !important;
+}
+
+.tab-pill-btn {
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: transparent;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.tab-pill-btn.active {
+  background-color: #ffffff;
+  color: #4f46e5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.layout.theme-dark .tab-pill-btn {
+  color: #a1a1aa !important;
+  background-color: transparent !important;
+}
+
+.layout.theme-dark .tab-pill-btn.active {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 12px rgba(79, 70, 229, 0.4) !important;
+}
+
+/* --------------------------------------------------------
+   BODY & CONTENT WORKSPACE
+   -------------------------------------------------------- */
+.body {
+  flex: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 16px;
+  transition: all 0.25s ease;
+}
+
+.content {
+  border-radius: 16px;
+  padding: 24px 28px;
+  height: 100%;
+  overflow-y: auto;
+  width: 100%;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.content::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Light Theme Content */
+.content.theme-light {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  color: #0f172a;
+}
+
+/* Dark Theme Content (Pitch Black with Crisp White Text) */
+.content.theme-dark {
+  background-color: #000000 !important;
+  border: 1px solid #1f2937 !important;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6) !important;
+  color: #ffffff !important;
+}
+
+.content > div {
+  width: 100%;
+}
+
+/* --------------------------------------------------------
+   TRUE OLED PURE BLACK NIGHT THEME RULES
+   -------------------------------------------------------- */
+
+/* 1. All Headings and Typography in Night Mode */
+.layout.theme-dark h1,
+.layout.theme-dark h2,
+.layout.theme-dark h3,
+.layout.theme-dark h4,
+.layout.theme-dark h5,
+.layout.theme-dark h6,
+.layout.theme-dark strong,
+.layout.theme-dark b,
+.layout.theme-dark label,
+.layout.theme-dark .ant-typography,
+.layout.theme-dark .text-slate-800,
+.layout.theme-dark .text-slate-900 {
+  color: #ffffff !important;
+}
+
+.layout.theme-dark p,
+.layout.theme-dark span:not(.badge):not(.ant-tag),
+.layout.theme-dark li {
+  color: #e4e4e7;
+}
+
+/* Muted subtitles */
+.layout.theme-dark .text-muted,
+.layout.theme-dark p[style*="color: #64748b"],
+.layout.theme-dark span[style*="color: #64748b"],
+.layout.theme-dark div[style*="color: #64748b"] {
+  color: #a1a1aa !important;
+}
+
+/* 2. Cards in Night Mode (Deep Charcoal Black #0a0a0c) */
+.layout.theme-dark .card,
+.layout.theme-dark .card-lg,
+.layout.theme-dark .ant-card {
+  background-color: #0a0a0c !important;
+  border-color: #27272a !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* 3. Automatic override for inline light backgrounds inside dark mode */
+.layout.theme-dark div[style*="background-color: #f8fafc"],
+.layout.theme-dark div[style*="backgroundColor: #f8fafc"],
+.layout.theme-dark div[style*="background-color: #f1f5f9"],
+.layout.theme-dark div[style*="backgroundColor: #f1f5f9"],
+.layout.theme-dark div[style*="background: #f1f5f9"],
+.layout.theme-dark div[style*="background: #f8fafc"],
+.layout.theme-dark div[style*="background-color: #ffffff"],
+.layout.theme-dark div[style*="backgroundColor: #ffffff"],
+.layout.theme-dark div[style*="background: #ffffff"],
+.layout.theme-dark div[style*="background-color: rgb(248, 250, 252)"],
+.layout.theme-dark div[style*="background-color: rgb(255, 255, 255)"],
+.layout.theme-dark div[style*="background-color: #e2e8f0"],
+.layout.theme-dark div[style*="backgroundColor: #e2e8f0"] {
+  background-color: #121215 !important;
+  border-color: #27272a !important;
+  color: #ffffff !important;
+}
+
+/* Force dark-mode white text on elements with hardcoded light-theme colors */
+.layout.theme-dark *[style*="color: #0f172a"],
+.layout.theme-dark *[style*="color: rgb(15, 23, 42)"],
+.layout.theme-dark *[style*="color: #475569"],
+.layout.theme-dark *[style*="color: #334155"] {
+  color: #ffffff !important;
+}
+
+/* 4. Dividers */
+.layout.theme-dark .divider,
+.layout.theme-dark .ant-divider {
+  border-color: #27272a !important;
+}
+
+/* 5. Tables in Night Mode */
+.layout.theme-dark .ant-table {
+  background-color: #0a0a0c !important;
+  color: #ffffff !important;
+}
+
+.layout.theme-dark .ant-table-container {
+  border: 1px solid #27272a !important;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.layout.theme-dark .ant-table-thead > tr > th {
+  background-color: #121215 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #27272a !important;
+  font-weight: 700;
+}
+
+.layout.theme-dark .ant-table-tbody > tr > td {
+  background-color: #0a0a0c !important;
+  border-bottom: 1px solid #1f2937 !important;
+  color: #ffffff !important;
+}
+
+.layout.theme-dark .ant-table-tbody > tr:hover > td {
+  background-color: #18181b !important;
+  color: #ffffff !important;
+}
+
+.layout.theme-dark .ant-pagination-item {
+  background-color: #121215 !important;
+  border-color: #27272a !important;
+}
+
+.layout.theme-dark .ant-pagination-item a {
+  color: #ffffff !important;
+}
+
+.layout.theme-dark .ant-pagination-item-active {
+  background-color: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+}
+
+.layout.theme-dark .ant-pagination-prev button,
+.layout.theme-dark .ant-pagination-next button {
+  background-color: #121215 !important;
+  color: #ffffff !important;
+  border-color: #27272a !important;
+}
+
+/* 6. Form Inputs & Selects in Night Mode */
+.layout.theme-dark input,
+.layout.theme-dark textarea,
+.layout.theme-dark select,
+.layout.theme-dark .ant-input,
+.layout.theme-dark .ant-input-password,
+.layout.theme-dark .ant-select-selector {
+  background-color: #0e0e11 !important;
+  border-color: #27272a !important;
+  color: #ffffff !important;
+}
+
+.layout.theme-dark input::placeholder,
+.layout.theme-dark textarea::placeholder,
+.layout.theme-dark .ant-input::placeholder {
+  color: #71717a !important;
+}
+
+/* 7. Tabs in Night Mode */
+.layout.theme-dark .ant-tabs-nav {
+  color: #a1a1aa !important;
+}
+
+.layout.theme-dark .ant-tabs-tab {
+  color: #a1a1aa !important;
+}
+
+.layout.theme-dark .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #818cf8 !important;
+  font-weight: 700;
+}
+
+.layout.theme-dark .ant-tabs-ink-bar {
+  background: #818cf8 !important;
+}
+
+/* 8. Ant Design Empty State */
+.layout.theme-dark .ant-empty-description {
+  color: #a1a1aa !important;
+}
+
+/* 9. Header for Proctored Runner in Dark Mode */
+.layout.theme-dark .header {
+  background: #0a0a0c !important;
+  border-color: #27272a !important;
+  color: #ffffff !important;
+}
+
+.layout.theme-dark .header span,
+.layout.theme-dark .header strong {
+  color: #ffffff !important;
+}
+
+/* Default Light Proctored Header */
+.header {
+  background: #ffffff;
+  color: #0f172a !important;
+  width: 100% !important;
+  padding: 12px 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center !important;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 14px;
+}
+
+/* --------------------------------------------------------
+   FAST IN-PLACE SKELETON LOADERS (Non-blocking)
+   -------------------------------------------------------- */
+@keyframes tqPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.998); }
+}
+
+.skeleton-card {
+  animation: tqPulse 1.4s ease-in-out infinite;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  height: 280px;
+  width: 100%;
+}
+
+.layout.theme-dark .skeleton-card {
+  background-color: #0d0d10 !important;
+  border-color: #1f2937 !important;
+}
+
+/* --------------------------------------------------------
+   COMPREHENSIVE MOBILE & TABLET RESPONSIVENESS (A to Z)
+   -------------------------------------------------------- */
+
+/* 1. Mobile Topbar (Hidden on Desktop, Visible on Mobile & Tablets) */
+.mobile-topbar {
+  display: none;
+}
+
+.mobile-sidebar-backdrop {
+  display: none;
+}
+
+.sidebar-close-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Layout stacks vertically on mobile */
+  .layout {
+    flex-direction: column !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  /* Mobile Top Navigation Header */
+  .mobile-topbar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 14px;
+    flex-shrink: 0;
+    z-index: 1000;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+  }
+
+  .layout.theme-dark .mobile-topbar {
+    background-color: #000000 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+
+  /* Off-Canvas Slide-over Sidebar Drawer */
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 280px !important;
+    max-width: 82vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 1200 !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: none;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0) !important;
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  /* Close button inside mobile drawer */
+  .sidebar-close-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.2s ease;
+  }
+
+  /* Frosted Backdrop Overlay */
+  .mobile-sidebar-backdrop {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.65) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    z-index: 1150 !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease !important;
+  }
+
+  .mobile-sidebar-backdrop.active {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Content area reclaimed on mobile */
+  .body {
+    padding: 6px !important;
+    height: calc(100vh - 56px) !important;
+    height: calc(100dvh - 56px) !important;
+    overflow: hidden !important;
+  }
+
+  .content {
+    padding: 14px 10px !important;
+    border-radius: 12px !important;
+  }
+
+  /* Card padding on phones */
+  .card, .card-lg {
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+  }
+
+  /* Tab pills touch scroll */
+  .tab-pill-container {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    white-space: nowrap !important;
+    display: flex !important;
+  }
+
+  .tab-pill-btn {
+    flex-shrink: 0 !important;
+    font-size: 12px !important;
+    padding: 7px 12px !important;
+  }
+
+  /* Ant Design Table Mobile Touch Scroll */
+  .ant-table-wrapper {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Form inputs iOS zoom prevention */
+  input, textarea, select, .ant-input, .ant-select-selector {
+    font-size: 16px !important;
+  }
+
+  /* Modal widths on mobile */
+  .ant-modal {
+    max-width: 95vw !important;
+    margin: 12px auto !important;
+    top: 16px !important;
+  }
+
+  .ant-modal-content {
+    padding: 18px 14px !important;
+    border-radius: 16px !important;
+  }
+}

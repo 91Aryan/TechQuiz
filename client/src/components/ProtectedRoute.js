@@ -1,0 +1,610 @@
+import { message } from "antd";
+import React, { useEffect, useState } from "react";
+import { getUserInfo } from "../apicalls/users";
+import { useDispatch, useSelector } from "react-redux";
+import { SetUser } from "../redux/usersSlice.js";
+import { useNavigate, useLocation } from "react-router-dom";
+import { HideLoading, ShowLoading } from "../redux/loaderSlice";
+import { BrandLogo } from "./TechIcons";
+import ProfileModal from "./ProfileModal";
+
+function ProtectedRoute({ children, requireAdmin = false }) {
+  const { user } = useSelector((state) => state.users);
+  const [menu, setMenu] = useState([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+  
+  // Theme state: Day (Light) vs Night (Dark) mode with localStorage persistence
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved =
+      localStorage.getItem("techquiz_theme") ||
+      localStorage.getItem("techquiz_landing_theme");
+    return saved === "light" ? false : true; // Default: Pure OLED Night mode
+  });
+
+  const toggleTheme = () => {
+    const next = !isDarkMode;
+    setIsDarkMode(next);
+    localStorage.setItem("techquiz_theme", next ? "dark" : "light");
+    localStorage.setItem("techquiz_landing_theme", next ? "dark" : "light");
+  };
+
+  useEffect(() => {
+    const syncTheme = (e) => {
+      if (e.key === "techquiz_theme" || e.key === "techquiz_landing_theme") {
+        setIsDarkMode(e.newValue === "dark");
+      }
+    };
+    window.addEventListener("storage", syncTheme);
+    return () => window.removeEventListener("storage", syncTheme);
+  }, []);
+
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const isAdmin = Boolean(user?.isAdmin);
+
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("techquiz_user");
+    sessionStorage.clear();
+    dispatch(SetUser(null));
+    navigate("/login");
+  };
+
+  const userMenu = [
+    {
+      title: "Available Quizzes",
+      paths: ["/", "/home", "/user/write-exam"],
+      icon: <i className="ri-compass-3-line"></i>,
+      onClick: () => navigate("/"),
+    },
+    {
+      title: "Leaderboard & Ranks",
+      paths: ["/leaderboard"],
+      icon: <i className="ri-trophy-line"></i>,
+      onClick: () => navigate("/leaderboard"),
+    },
+    {
+      title: "My History & Reports",
+      paths: ["/user/reports"],
+      icon: <i className="ri-award-line"></i>,
+      onClick: () => navigate("/user/reports"),
+    },
+    {
+      title: "User Profile",
+      paths: ["/profile"],
+      icon: <i className="ri-user-3-line"></i>,
+      onClick: () => navigate("/profile"),
+    },
+    {
+      title: "Sign Out",
+      paths: ["/logout"],
+      icon: <i className="ri-logout-box-r-line"></i>,
+      onClick: handleSignOut,
+    },
+  ];
+
+  const getAdminMenu = (currentUser) => {
+    const isSuperAdmin = (currentUser?.email || "").toLowerCase() === "admin@quiz.com";
+    return [
+      {
+        title: "Manage Exams",
+        paths: ["/admin/exams"],
+        icon: <i className="ri-dashboard-line"></i>,
+        onClick: () => navigate("/admin/exams"),
+      },
+      {
+        title: "Add New Exam",
+        paths: ["/admin/exams/add"],
+        icon: <i className="ri-add-circle-line"></i>,
+        onClick: () => navigate("/admin/exams/add"),
+      },
+      {
+        title: "Submissions & Reports",
+        paths: ["/admin/reports"],
+        icon: <i className="ri-file-chart-line"></i>,
+        onClick: () => navigate("/admin/reports"),
+      },
+      {
+        title: isSuperAdmin ? "Admin Emails & Roles 👑" : "Admin Directory & Roles",
+        paths: ["/admin/users"],
+        icon: <i className="ri-shield-keyhole-line"></i>,
+        onClick: () => navigate("/admin/users"),
+      },
+      {
+        title: "Leaderboard & Ranks",
+        paths: ["/leaderboard"],
+        icon: <i className="ri-trophy-line"></i>,
+        onClick: () => navigate("/leaderboard"),
+      },
+      {
+        title: "Admin Profile",
+        paths: ["/profile"],
+        icon: <i className="ri-shield-user-line"></i>,
+        onClick: () => navigate("/profile"),
+      },
+      {
+        title: "User View Preview",
+        paths: ["/"],
+        icon: <i className="ri-eye-line"></i>,
+        onClick: () => navigate("/"),
+      },
+      {
+        title: "Sign Out",
+        paths: ["/logout"],
+        icon: <i className="ri-logout-box-r-line"></i>,
+        onClick: handleSignOut,
+      },
+    ];
+  };
+
+  const getUserData = async () => {
+    try {
+      if (!user) {
+        dispatch(ShowLoading());
+      }
+      const response = await getUserInfo();
+      if (!user) {
+        dispatch(HideLoading());
+      }
+      if (response.success) {
+        const userData = response.data;
+        dispatch(SetUser(userData));
+
+        // Strict Admin Route Guard
+        if (requireAdmin && !userData.isAdmin) {
+          message.error("Access Denied: Admin role required to access this portal.");
+          navigate("/");
+          return;
+        }
+
+        if (userData.isAdmin) {
+          setMenu(getAdminMenu(userData));
+        } else {
+          setMenu(userMenu);
+        }
+      } else {
+        localStorage.removeItem("token");
+        localStorage.removeItem("techquiz_user");
+        sessionStorage.clear();
+        dispatch(SetUser(null));
+        navigate("/login");
+      }
+    } catch (error) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("techquiz_user");
+      sessionStorage.clear();
+      dispatch(SetUser(null));
+      dispatch(HideLoading());
+      navigate("/login");
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      setMenu(user.isAdmin ? getAdminMenu(user) : userMenu);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      getUserData();
+    } else {
+      navigate("/login");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const activeRoute = window.location.pathname;
+
+  const getIsActiveOrNot = (paths) => {
+    if (paths.includes(activeRoute)) {
+      return true;
+    } else {
+      if (
+        activeRoute.includes("/admin/exams/edit") &&
+        paths.includes("/admin/exams")
+      ) {
+        return true;
+      }
+      if (
+        activeRoute.includes("/user/write-exam") &&
+        paths.includes("/user/write-exam")
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const isExamRunner = activeRoute.includes("/user/write-exam");
+
+  return (
+    <div className={`layout ${isDarkMode ? "theme-dark" : "theme-light"}`}>
+      {/* Mobile Backdrop Overlay */}
+      {!isExamRunner && (
+        <div
+          className={`mobile-sidebar-backdrop ${mobileMenuOpen ? "active" : ""}`}
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Authentic Full-Height Fixed Anchored Sidebar (Slide-in Drawer on Mobile) */}
+      {!isExamRunner && (
+        <aside
+          className={`sidebar ${isDarkMode ? "theme-dark" : "theme-light"} ${
+            mobileMenuOpen ? "mobile-open" : ""
+          }`}
+        >
+          {/* Brand header */}
+          <div
+            className="flex items-center gap-3 mb-4 px-2 py-3"
+            style={{
+              justifyContent: "space-between",
+              borderBottom: isDarkMode
+                ? "1px solid rgba(255, 255, 255, 0.08)"
+                : "1px solid #e2e8f0",
+            }}
+          >
+            <div
+              className="flex items-center gap-3 cursor-pointer"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate(isAdmin ? "/admin/exams" : "/");
+              }}
+              title="TechQuiz Home"
+            >
+              <BrandLogo size={36} />
+              <div className="flex flex-col">
+                <span
+                  style={{
+                    fontWeight: 800,
+                    color: isDarkMode ? "#ffffff" : "#0f172a",
+                    fontSize: "16px",
+                    letterSpacing: "-0.02em",
+                    lineHeight: "1.1",
+                  }}
+                >
+                  TechQuiz
+                  <span style={{ color: isAdmin ? "#a855f7" : "#0284c7" }}>
+                    {isAdmin ? ".admin" : ".io"}
+                  </span>
+                </span>
+                <span
+                  style={{
+                    fontSize: "9.5px",
+                    color: isDarkMode
+                      ? isAdmin ? "#c084fc" : "#38bdf8"
+                      : isAdmin ? "#7c3aed" : "#2563eb",
+                    letterSpacing: "0.06em",
+                    fontWeight: 700,
+                    marginTop: "2px",
+                  }}
+                >
+                  {isAdmin ? "ADMIN CONSOLE" : "USER PORTAL"}
+                </span>
+              </div>
+            </div>
+
+            {/* Close Button on Mobile Drawer */}
+            <button
+              type="button"
+              className="sidebar-close-btn"
+              onClick={() => setMobileMenuOpen(false)}
+              title="Close Menu"
+            >
+              <i className="ri-close-line"></i>
+            </button>
+          </div>
+
+          {/* Navigation Menu */}
+          <nav className="menu" style={{ flex: 1 }}>
+            {menu.map((item, index) => {
+              const isActive = getIsActiveOrNot(item.paths);
+              return (
+                <div
+                  className={`menu-item ${isActive ? "active-menu-item" : ""}`}
+                  key={index}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    item.onClick();
+                  }}
+                  title={item.title}
+                >
+                  {item.icon}
+                  <span>{item.title}</span>
+                </div>
+              );
+            })}
+          </nav>
+
+          {/* Day / Night Theme Toggle Switcher */}
+          <div
+            className="sidebar-theme-btn"
+            onClick={toggleTheme}
+            title={
+              isDarkMode
+                ? "Currently Night Mode. Click for Day Mode ☀️"
+                : "Currently Day Mode. Click for Night Mode 🌙"
+            }
+            style={{
+              marginBottom: "10px",
+              padding: "9px 12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              cursor: "pointer",
+              borderRadius: "10px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 16 }}>{isDarkMode ? "🌙" : "☀️"}</span>
+              <span style={{ fontSize: "12.5px", fontWeight: 600 }}>
+                {isDarkMode ? "Night Mode" : "Day Mode"}
+              </span>
+            </div>
+            <span
+              style={{
+                fontSize: "11px",
+                padding: "2px 7px",
+                borderRadius: "6px",
+                background: isDarkMode
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : "#e2e8f0",
+                color: isDarkMode ? "#cbd5e1" : "#475569",
+                fontWeight: 600,
+              }}
+            >
+              {isDarkMode ? "Switch ☀️" : "Switch 🌙"}
+            </span>
+          </div>
+
+          {/* Bottom Sidebar User Profile Card */}
+          {user && (
+            <div
+              className="sidebar-user-footer"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate("/profile");
+              }}
+              title="Click to view full profile & settings"
+              style={{
+                padding: "10px 12px",
+                borderRadius: "12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                gap: "10px",
+              }}
+            >
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  background:
+                    (user?.email || "").toLowerCase() === "admin@quiz.com"
+                      ? "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+                      : isAdmin
+                      ? "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)"
+                      : "linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)",
+                  color: "#ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  flexShrink: 0,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                }}
+              >
+                {(user?.email || "").toLowerCase() === "admin@quiz.com"
+                  ? "👑"
+                  : user?.name
+                  ? user.name[0].toUpperCase()
+                  : "U"}
+              </div>
+              <div style={{ overflow: "hidden", flex: 1 }}>
+                <div
+                  style={{
+                    color: isDarkMode ? "#f8fafc" : "#0f172a",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {user?.name}
+                </div>
+                <div
+                  style={{
+                    color: isDarkMode ? "#94a3b8" : "#64748b",
+                    fontSize: "11px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                    fontWeight: 500,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      background: "#10b981",
+                      display: "inline-block",
+                    }}
+                  ></span>
+                  {(user?.email || "").toLowerCase() === "admin@quiz.com"
+                    ? "Super Admin • Active 👑"
+                    : isAdmin
+                    ? "Admin • Active"
+                    : "User • Active"}
+                </div>
+              </div>
+              <i
+                className="ri-arrow-right-s-line"
+                style={{
+                  color: isDarkMode ? "#94a3b8" : "#64748b",
+                  fontSize: 18,
+                }}
+              ></i>
+            </div>
+          )}
+        </aside>
+      )}
+
+      {/* Mobile Top Navigation Header */}
+      {!isExamRunner && (
+        <header className="mobile-topbar">
+          <div
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              navigate(isAdmin ? "/admin/exams" : "/");
+            }}
+          >
+            <BrandLogo size={28} />
+            <div className="flex flex-col">
+              <span
+                style={{
+                  fontWeight: 800,
+                  color: isDarkMode ? "#ffffff" : "#0f172a",
+                  fontSize: "15px",
+                  letterSpacing: "-0.02em",
+                  lineHeight: "1.1",
+                }}
+              >
+                TechQuiz
+                <span style={{ color: isAdmin ? "#a855f7" : "#0284c7" }}>
+                  {isAdmin ? ".admin" : ".io"}
+                </span>
+              </span>
+              <span
+                style={{
+                  fontSize: "8.5px",
+                  color: isDarkMode ? (isAdmin ? "#c084fc" : "#38bdf8") : (isAdmin ? "#7c3aed" : "#2563eb"),
+                  fontWeight: 700,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {isAdmin ? "ADMIN" : "USER"}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              title={isDarkMode ? "Switch to Day Mode" : "Switch to Night Mode"}
+              style={{
+                border: "none",
+                background: isDarkMode ? "rgba(255, 255, 255, 0.1)" : "#f1f5f9",
+                borderRadius: 8,
+                width: 34,
+                height: 34,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                fontSize: 16,
+              }}
+            >
+              {isDarkMode ? "🌙" : "☀️"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              title="Toggle Navigation Menu"
+              style={{
+                border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid #cbd5e1",
+                background: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "#ffffff",
+                borderRadius: 8,
+                width: 36,
+                height: 36,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                fontSize: 20,
+                color: isDarkMode ? "#ffffff" : "#0f172a",
+              }}
+            >
+              <i className={mobileMenuOpen ? "ri-close-line" : "ri-menu-2-line"}></i>
+            </button>
+          </div>
+        </header>
+      )}
+
+      {/* Main Workspace Body */}
+      <main className="body">
+        {/* Top Header - only shown during proctored exams */}
+        {isExamRunner && (
+          <div className="header" style={{ marginBottom: 14 }}>
+            <div className="flex items-center gap-3">
+              <BrandLogo size={32} />
+              <div>
+                <span className="font-extrabold text-slate-800 text-base">
+                  TechQuiz • Assessment Runner
+                </span>
+                <span
+                  className="badge badge-primary ml-2"
+                  style={{ fontSize: 10, background: "#e0e7ff", color: "#4338ca" }}
+                >
+                  FULL PAGE PROCTORED
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold text-slate-700">
+                User: <strong>{user?.name}</strong>
+              </span>
+              <button
+                type="button"
+                className="primary-outlined-btn"
+                style={{ height: 32, padding: "0 12px", fontSize: 12, borderRadius: 8 }}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Are you sure you want to exit the examination? Any unsaved responses will be discarded."
+                    )
+                  ) {
+                    navigate("/");
+                  }
+                }}
+              >
+                <i className="ri-close-line"></i> Exit Exam
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Main Page Content */}
+        <div className={`content ${isDarkMode ? "theme-dark" : "theme-light"}`}>
+          {children}
+        </div>
+      </main>
+
+      {/* Modern Profile Modal */}
+      <ProfileModal
+        visible={showProfileModal}
+        onCancel={() => setShowProfileModal(false)}
+        user={user}
+        onLogout={handleSignOut}
+      />
+    </div>
+  );
+}
+
+export default ProtectedRoute;
